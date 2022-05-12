@@ -101,6 +101,9 @@ public class Runner {
 		List<Tent> inRange = getTentsInHeightRange(mapByHeight, minHeight, maxHeight);
 		System.out.println("\nTents with height in range "+minHeight+" to "+maxHeight);
 		inRange.forEach(System.out::println);
+		
+		System.out.println("\nOriginal list:");
+		tents.forEach(System.out::println);
 	}
 
 }
