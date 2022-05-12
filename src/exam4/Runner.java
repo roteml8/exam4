@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class Runner {
@@ -26,19 +27,21 @@ public class Runner {
 		return tents;
 	}
 	
-	public static List<Tent> getSortedTentsWithNumPeopleOrMore(List<Tent> tents, int numPeople)
-	{
-		List<Tent> newList = tents.stream().filter(t->t.numPeople >= numPeople).collect(Collectors.toList());
-		Collections.sort(newList, (t1,t2)->t1.numPeople-t2.numPeople);
-		return newList;
-	}
-	
 	public static List<Tent> getSortedByArea(List<Tent> tents)
 	{
 		List<Tent> sorted = new ArrayList<>(tents);
 		Collections.sort(sorted, (t1, t2)->Double.compare(t1.getArea(),t2.getArea()));
 		return sorted;
 	}
+	
+	public static List<Tent> getSortedTentsWithNumPeopleOrMore(List<Tent> tents, int numPeople)
+	{
+		List<Tent> newList = tents.stream().
+				filter(t->t.numPeople >= numPeople).collect(Collectors.toList());
+		Collections.sort(newList, (t1,t2)->t1.numPeople-t2.numPeople);
+		return newList;
+	}
+	
 	
 	public static boolean isTentMaxHeight(List<Tent> tents, Tent max)
 	{
@@ -51,19 +54,26 @@ public class Runner {
 	{
 		Map<Double,List<Tent>> mapByHeight = new HashMap<>();
 		tents.forEach(t->mapByHeight.putIfAbsent(t.height, new ArrayList<Tent>()));
-		for (Double height: mapByHeight.keySet())
-		{
-			List<Tent> currentList = tents.stream().filter(t->t.height == height).collect(Collectors.toList());
-			mapByHeight.put(height, currentList);
-		}
+		
+		mapByHeight.keySet().forEach(height->
+		mapByHeight.put(height, 
+				tents.stream().filter(t->t.height == height).collect(Collectors.toList())));
+		
 		return mapByHeight;
 	}
 	
 	public static List<Tent> getTentsInHeightRange(Map<Double, List<Tent>> map, double minHeight, double maxHeight)
 	{
 		List<Tent> inRange = new ArrayList<>();
-		map.keySet().stream().filter(key-> key>= minHeight && key<=maxHeight).forEach(key->inRange.addAll(map.get(key)));
+		map.keySet().stream().filter(key-> key>= minHeight && key<=maxHeight)
+			.forEach(key->inRange.addAll(map.get(key)));
 		return inRange;
+	}
+	
+	public static void printTentsWithHeight(Entry<Double, List<Tent>> entry)
+	{
+		System.out.printf("\nTents with height %.2f\n", entry.getKey());
+		entry.getValue().forEach(System.out::println);
 	}
 
 	public static void main(String[] args) {
@@ -83,13 +93,9 @@ public class Runner {
 		tents.forEach(t->System.out.printf("\nIs tent with height %.2f max height? %b", t.height, isTentMaxHeight(tents, t))); 
 		
 		Map<Double,List<Tent>> mapByHeight = getMapOfTentsByHeight(tents);
-		System.out.println("\nMap of tents by height: ");
-		for (Double height: mapByHeight.keySet())
-		{
-			System.out.printf("\nTents with height %.2f ",height);
-			System.out.println(mapByHeight.get(height));
-		
-		}
+		System.out.println("\n\nMap of tents by height: ");
+		mapByHeight.entrySet().forEach(entry->printTentsWithHeight(entry));
+
 		
 		double minHeight = 50, maxHeight = 100;
 		List<Tent> inRange = getTentsInHeightRange(mapByHeight, minHeight, maxHeight);
